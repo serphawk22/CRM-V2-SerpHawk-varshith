@@ -16,11 +16,13 @@ import {
   Briefcase,
   Globe,
   MoreVertical,
-  Activity
+  Activity,
+  Mail
 } from 'lucide-react';
 import Link from 'next/link';
 import { API_BASE_URL } from '@/config';
 import { cn } from '@/lib/utils';
+import PageGuide from '@/components/PageGuide';
 
 // Framer Motion Variants
 const containerVariants = {
@@ -154,8 +156,11 @@ export default function ClientsPage() {
     }
   };
 
+  const [addLoading, setAddLoading] = useState(false);
   const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (addLoading) return;
+    setAddLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/clients`, {
         method: 'POST',
@@ -183,13 +188,27 @@ export default function ClientsPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setAddLoading(false);
     }
   };
 
-  const filteredClients = clients.filter(c => 
-    c.projectName?.toLowerCase().includes(search.toLowerCase()) ||
-    c.email?.toLowerCase().includes(search.toLowerCase())
-  );
+  // Delete client handler
+  const handleDeleteClient = async (clientId: number) => {
+    if (!window.confirm('Are you sure you want to delete this client?')) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/clients/${clientId}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchClients();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Show all clients regardless of projectName, email, or companyName
+  // If you want to keep search, use: clients.filter(c => ...)
+  const filteredClients = clients;
 
   const StatusBadge = ({ statusName }: { statusName: string }) => {
     const statusObj = statuses.find(s => s.name === statusName);
@@ -242,6 +261,18 @@ export default function ClientsPage() {
           </button>
         </div>
       </motion.div>
+
+      <PageGuide
+        pageKey="clients"
+        title="How the Client Hub works"
+        description="Your central command for managing all client accounts, contacts, and intelligence."
+        steps={[
+          { icon: '➕', text: 'Click \"Add Client\" to create a new account with company name, website, email, and keywords.' },
+          { icon: '📷', text: 'Use \"OCR Scan\" to extract client details from a business card photo automatically.' },
+          { icon: '🔍', text: 'Search by name or company and use filters to quickly find any client.' },
+          { icon: '👁️', text: 'Click any client card to view their full profile, services, audit, and communication history.' },
+        ]}
+      />
 
       {/* KPI Cards */}
       <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -322,15 +353,20 @@ export default function ClientsPage() {
                     <div className="flex justify-between items-start mb-6 relative z-10">
                       <div>
                         <h3 className="font-black text-xl text-slate-800 group-hover:text-indigo-600 transition-colors tracking-tight line-clamp-1">
-                          {client.projectName || 'Unnamed Project'}
+                          {client.companyName || client.projectName || client.email || 'Unnamed Client'}
                         </h3>
-                        {client.companyName && (
+                        {client.email && (
                           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-1 flex items-center gap-1 line-clamp-1">
-                            <Briefcase className="w-3 h-3" /> {client.companyName}
+                            <Mail className="w-3 h-3" /> {client.email}
                           </p>
                         )}
                       </div>
-                      <StatusBadge statusName={client.status} />
+                      <div className="flex items-center gap-2">
+                        <StatusBadge statusName={client.status} />
+                        <button onClick={e => { e.preventDefault(); e.stopPropagation(); handleDeleteClient(client.id); }} title="Delete client" className="ml-2 p-1.5 rounded-full bg-red-100 hover:bg-red-200 text-red-600 transition-colors">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-4 relative z-10">
