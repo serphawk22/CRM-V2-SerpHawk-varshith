@@ -85,7 +85,7 @@ const BADGE_COLORS: Record<string, string> = {
 export function AdminSidebar() {
   const pathname = usePathname();
   const { role, logout, email } = useRole();
-  const { collapsed, setCollapsed } = useSidebar();
+  const { collapsed, setCollapsed, isMobile, isOpen, setIsOpen } = useSidebar();
 
   const filteredBySection = (sectionKey: string) =>
     NAV_ITEMS.filter(
@@ -94,11 +94,30 @@ export function AdminSidebar() {
 
   return (
     <>
+    {/* Mobile Overlay */}
+    <AnimatePresence>
+      {isMobile && isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40"
+        />
+      )}
+    </AnimatePresence>
+
     <motion.aside
       initial={false}
-      animate={{ width: collapsed ? 72 : 260 }}
+      animate={{ 
+        width: collapsed ? 72 : 260,
+        x: isMobile ? (isOpen ? 0 : -260) : 0
+      }}
       transition={{ type: "spring", stiffness: 300, damping: 35 }}
-      className="admin-sidebar fixed left-0 top-0 h-screen z-40 flex flex-col overflow-hidden"
+      className={cn(
+        "admin-sidebar fixed left-0 top-0 h-screen z-50 flex flex-col overflow-hidden bg-white border-r border-slate-100 shadow-xl md:shadow-none",
+        isMobile ? "w-[260px]" : ""
+      )}
     >
       {/* ── Logo ── */}
       <div className="relative flex items-center gap-3 px-4 py-5 border-b border-slate-100 shrink-0">
@@ -261,18 +280,20 @@ export function AdminSidebar() {
       </div>
     </motion.aside>
 
-    {/* ── Expand / collapse tab — outside aside so it's never clipped ── */}
-    <motion.button
-      onClick={() => setCollapsed(!collapsed)}
-      animate={{ left: collapsed ? 72 : 260 }}
-      transition={{ type: "spring", stiffness: 300, damping: 35 }}
-      whileHover={{ x: 3 }}
-      whileTap={{ scale: 0.92 }}
-      title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      className="fixed top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-5 h-14 rounded-r-xl bg-indigo-600 shadow-lg shadow-indigo-300/60 text-white hover:bg-indigo-700 transition-colors"
-    >
-      <ChevronRight className={cn("w-3.5 h-3.5 transition-transform duration-300", !collapsed && "rotate-180")} />
-    </motion.button>
+    {/* ── Expand / collapse tab — outside aside ── */}
+    {!isMobile && (
+      <motion.button
+        onClick={() => setCollapsed(!collapsed)}
+        animate={{ left: collapsed ? 72 : 260 }}
+        transition={{ type: "spring", stiffness: 300, damping: 35 }}
+        whileHover={{ x: 3 }}
+        whileTap={{ scale: 0.92 }}
+        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className="fixed top-1/2 -translate-y-1/2 z-50 flex items-center justify-center w-5 h-14 rounded-r-xl bg-indigo-600 shadow-lg shadow-indigo-300/60 text-white hover:bg-indigo-700 transition-colors"
+      >
+        <ChevronRight className={cn("w-3.5 h-3.5 transition-transform duration-300", !collapsed && "rotate-180")} />
+      </motion.button>
+    )}
     </>
   );
 }

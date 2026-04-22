@@ -13,6 +13,7 @@ import {
   Sparkles,
   Clock,
   Command,
+  Menu,
 } from "lucide-react";
 import { useRole, Role } from "@/context/RoleContext";
 import { useSidebar } from "@/context/SidebarContext";
@@ -54,7 +55,7 @@ const ROLE_BADGE: Record<Role, { label: string; color: string }> = {
 
 export function AdminTopbar() {
   const { role, email, logout, user } = useRole();
-  const { collapsed } = useSidebar();
+  const { collapsed, isMobile, toggleSidebar } = useSidebar();
   const pathname = usePathname();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -138,12 +139,20 @@ export function AdminTopbar() {
   }, []);
 
   return (
-    <header className={`admin-topbar fixed top-0 right-0 left-0 ${collapsed ? 'md:left-[72px]' : 'md:left-[260px]'} h-16 z-30 flex items-center px-6 gap-4 transition-all duration-300`}>
+    <header className={`admin-topbar fixed top-0 right-0 left-0 ${isMobile ? 'left-0' : (collapsed ? 'left-[72px]' : 'left-[260px]')} h-16 z-30 flex items-center px-6 gap-4 transition-all duration-300`}>
       {/* Subtle top border gradient */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-300/40 to-transparent" />
 
       {/* ── Page Title ── */}
       <div className="flex-1 flex items-center gap-3">
+        {isMobile && (
+          <button 
+            onClick={toggleSidebar}
+            className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-all mr-1"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
         <div>
           <h1 className="text-[15px] font-black text-slate-800 leading-tight capitalize">{pageTitle}</h1>
           <p className="text-[10px] text-slate-400 font-medium hidden md:block">

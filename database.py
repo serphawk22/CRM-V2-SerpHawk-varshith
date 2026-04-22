@@ -383,6 +383,7 @@ class SentEmail(SQLModel, table=True):
     recommended_services: Optional[str] = Field(default=None, sa_column=Column(Text))
     manual: Optional[bool] = Field(default=False)
     draft_json: Optional[str] = Field(default=None, sa_column=Column(Text))  # Store the whole draft as JSON
+    is_draft: bool = Field(default=False)
     sent_at: datetime = Field(default_factory=datetime.utcnow)
 
 

@@ -12,14 +12,17 @@ from modules.scraper import research_and_map_company
 from pydantic import BaseModel
 
 from database import engine, SentEmail
+from sqlalchemy.orm import joinedload
 from sqlmodel import select
 
 def register_sent_emails_endpoint(app, get_session):
     from fastapi import Depends
     from sqlmodel import Session
     @app.get("/sent-emails")
-    def get_sent_emails(client_id: int = None, limit: int = 50, session: Session = Depends(get_session)):
+    def get_sent_emails(client_id: int = None, include_drafts: bool = False, limit: int = 50, session: Session = Depends(get_session)):
         query = select(SentEmail).order_by(SentEmail.sent_at.desc())
+        if not include_drafts:
+            query = query.where(SentEmail.is_draft == False)
         if client_id:
             query = query.where(SentEmail.client_id == client_id)
         emails = session.exec(query.limit(limit)).all()
@@ -34,6 +37,7 @@ def register_sent_emails_endpoint(app, get_session):
                 "recommended_services": e.recommended_services,
                 "manual": e.manual,
                 "draft_json": e.draft_json,
+                "is_draft": e.is_draft,
                 "sent_at": e.sent_at.isoformat() if e.sent_at else None
             }
             for e in emails
@@ -796,13 +800,67 @@ def list_client_statuses(session: Session = Depends(get_session)):
 @app.get("/clients")
 def list_clients(
     status: Optional[str] = None,
+    payment_status: Optional[str] = None,
+    has_active_services: Optional[bool] = None,
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     session: Session = Depends(get_session),
 ):
-    q = select(ClientProfile)
+    """
+    Optimized client list with joined loading, pagination, and advanced filtering.
+    """
+    q = select(ClientProfile).options(joinedload(ClientProfile.user))
+    
     if status:
         q = q.where(ClientProfile.status == status)
-    clients = session.exec(q).all()
-    return {"clients": [_client_dict(c, session) for c in clients]}
+    if payment_status:
+        q = q.where(ClientProfile.payment_status == payment_status)
+    if has_active_services is True:
+        q = q.where(ClientProfile.services_offered != None)
+    
+    # Count total for pagination metadata
+    total = session.exec(select(func.count()).select_from(q.subquery())).one()
+    
+    # Fetch paginated results
+    clients = session.exec(q.order_by(ClientProfile.id.desc()).offset(offset).limit(limit)).all()
+    
+    return {
+        "clients": [_client_dict_optimized(c) for c in clients],
+        "total": total,
+        "limit": limit,
+        "offset": offset
+    }
+
+def _client_dict_optimized(cp: ClientProfile) -> dict:
+    """Helper to convert ClientProfile to dict using already-loaded user object."""
+    user = cp.user 
+    return {
+        "id": cp.id,
+        "userId": cp.userId,
+        "email": user.email if user else None,
+        "name": user.name if user else None,
+        "companyName": cp.companyName,
+        "phone": cp.phone,
+        "address": cp.address,
+        "status": cp.status,
+        "gmbName": cp.gmbName,
+        "seoStrategy": cp.seoStrategy,
+        "tagline": cp.tagline,
+        "targetKeywords": cp.targetKeywords or [],
+        "websiteUrl": cp.websiteUrl,
+        "recommended_services": cp.recommended_services,
+        "nextMilestone": cp.nextMilestone,
+        "nextMilestoneDate": cp.nextMilestoneDate,
+        "lastActivity": cp.lastActivity,
+        "lastActivityDate": cp.lastActivityDate,
+        "assignedEmployeeId": cp.assignedEmployeeId,
+        "projectId": cp.projectId,
+        "projectName": cp.projectName,
+        "payment_status": cp.payment_status,
+        "sitemap_url": cp.sitemap_url,
+        "cms_type": cp.cms_type,
+        "customFields": cp.customFields or {},
+    }
 
 
 @app.post("/clients")
@@ -1598,6 +1656,66 @@ def generate_email(body: GenerateEmailRequest, background_tasks: BackgroundTasks
         # If any required field is missing, skip sending and just generate the draft
 
         # Only save to database if required fields are present
+        if body.to_email:
+            sent_email = SentEmail(
+                client_id=body.client_id,
+                to_email=body.to_email,
+                subject=body.subject or "",
+                english_body=body.english_body or "",
+                spanish_body=body.spanish_body or "",
+                recommended_services=body.recommended_services or "",
+                manual=body.manual or False,
+                is_draft=False, # This endpoint is for sending, so it's not a draft
+                sent_at=datetime.utcnow()
+            )
+            session.add(sent_email)
+            session.commit()
+            session.refresh(sent_email)
+
+        return {"success": True, "company_name": company_name, "services": services, "outreach": outreach_llm, "inbound": inbound_llm}
+
+    except Exception as e:
+        print(f"Generate fail: {e}")
+        return {"error": str(e)}
+
+@app.post("/emails/draft")
+def save_email_draft(body: GenerateEmailRequest, session: Session = Depends(get_session)):
+    """Save an email as a draft for later review."""
+    try:
+        sent_email = SentEmail(
+            client_id=body.client_id,
+            to_email=body.to_email or "",
+            subject=body.subject or "",
+            english_body=body.english_body or "",
+            spanish_body=body.spanish_body or "",
+            recommended_services=body.recommended_services or "",
+            manual=True,
+            is_draft=True,
+            sent_at=datetime.utcnow()
+        )
+        session.add(sent_email)
+        session.commit()
+        session.refresh(sent_email)
+        return {"success": True, "id": sent_email.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/emails/drafts")
+def list_email_drafts(client_id: int = None, session: Session = Depends(get_session)):
+    query = select(SentEmail).where(SentEmail.is_draft == True).order_by(SentEmail.sent_at.desc())
+    if client_id:
+        query = query.where(SentEmail.client_id == client_id)
+    drafts = session.exec(query).all()
+    return {"drafts": [
+        {
+            "id": d.id,
+            "to_email": d.to_email,
+            "subject": d.subject,
+            "english_body": d.english_body,
+            "spanish_body": d.spanish_body,
+            "sent_at": d.sent_at.isoformat() if d.sent_at else None
+        } for d in drafts
+    ]}
         # Provide default subject and content if missing, so frontend always gets a visible draft
         # Build the draft object for both outreach and inbound
         draft_obj = {

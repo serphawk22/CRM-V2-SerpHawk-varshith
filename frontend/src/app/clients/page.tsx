@@ -64,7 +64,12 @@ export default function ClientsPage() {
   const [statuses, setStatuses] = useState<ClientStatusOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
+  const [paymentFilter, setPaymentFilter] = useState('All');
+  const [serviceFilter, setServiceFilter] = useState(false);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [limit] = useState(12);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -125,8 +130,12 @@ export default function ClientsPage() {
   }, []);
 
   useEffect(() => {
+    setPage(0);
+  }, [filter, paymentFilter, serviceFilter, search]);
+
+  useEffect(() => {
     fetchClients();
-  }, [filter]);
+  }, [filter, paymentFilter, serviceFilter, page]);
 
   const fetchStatuses = async () => {
     try {
@@ -141,13 +150,16 @@ export default function ClientsPage() {
   const fetchClients = async () => {
     setLoading(true);
     try {
-      const url = filter === 'All' 
-        ? `${API_BASE_URL}/clients`
-        : `${API_BASE_URL}/clients?status=${filter}`;
+      let url = `${API_BASE_URL}/clients?limit=${limit}&offset=${page * limit}`;
+      
+      if (filter !== 'All') url += `&status=${filter}`;
+      if (paymentFilter !== 'All') url += `&payment_status=${paymentFilter}`;
+      if (serviceFilter) url += `&has_active_services=true`;
       
       const res = await fetch(url);
       const data = await res.json();
       setClients(data.clients || []);
+      setTotal(data.total || 0);
     } catch (error) {
       console.error("Error fetching clients:", error);
       setClients([]);
@@ -238,12 +250,12 @@ export default function ClientsPage() {
   return (
     <motion.div 
       initial="hidden" animate="show" variants={containerVariants}
-      className="max-w-7xl mx-auto space-y-8"
+      className="max-w-7xl mx-auto space-y-8 pb-12"
     >
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 w-full bg-white/40 backdrop-blur-2xl p-6 rounded-[2rem] border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.05)]">
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10 w-full glass-premium p-8 rounded-[2.5rem] shadow-xl">
         <div>
-          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-900 tracking-tight">Client Hub</h1>
-          <p className="text-slate-500 font-medium text-sm mt-1">Manage all accounts, operations, and intelligence in one place.</p>
+          <h1 className="text-4xl font-black text-slate-800 tracking-tight leading-none mb-2">Client Hub</h1>
+          <p className="text-slate-500 font-medium text-sm">Strategic intelligence and operational command for your client portfolio.</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
           <button 
@@ -291,41 +303,78 @@ export default function ClientsPage() {
       </motion.div>
 
       {/* Main Glass Box */}
-      <motion.div variants={itemVariants} className="bg-white/40 backdrop-blur-2xl rounded-[2.5rem] border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.05)] overflow-hidden">
-        <div className="p-6 border-b border-white/60 flex flex-col md:flex-row gap-6 justify-between items-center bg-white/20">
-          <div className="relative w-full md:w-[28rem]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-400" />
-            <input 
-              type="text" 
-              placeholder="Search by project name or email address..." 
-              className="w-full pl-12 pr-4 py-3 bg-white/70 border border-white/80 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium text-slate-700 placeholder:text-slate-400 shadow-sm"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          
-          <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-            <button 
-              onClick={() => setFilter('All')}
-              className={cn(
-                "px-5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors",
-                filter === 'All' ? "bg-indigo-600 text-white shadow-md" : "bg-white/60 text-slate-600 hover:bg-white"
-              )}
-            >
-              All Hubs
-            </button>
-            {statuses.map(stat => (
+      <motion.div variants={itemVariants} className="glass-premium rounded-[3rem] shadow-2xl overflow-hidden border border-white/40">
+        <div className="p-6 border-b border-white/60 space-y-4 bg-white/20">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div className="relative w-full md:w-[28rem]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-400" />
+              <input 
+                type="text" 
+                placeholder="Search by project name or email address..." 
+                className="w-full pl-12 pr-4 py-3 bg-white/70 border border-white/80 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all font-medium text-slate-700 placeholder:text-slate-400 shadow-sm"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+            
+            <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
               <button 
-                key={stat.id}
-                onClick={() => setFilter(stat.name)}
+                onClick={() => setFilter('All')}
                 className={cn(
-                  "px-5 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-colors",
-                  filter === stat.name ? "bg-indigo-600 text-white shadow-md" : "bg-white/60 text-slate-600 hover:bg-white"
+                  "px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all",
+                  filter === 'All' ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" : "bg-white/60 text-slate-600 hover:bg-white"
                 )}
               >
-                {stat.name}
+                All Status
               </button>
-            ))}
+              {statuses.map(stat => (
+                <button 
+                  key={stat.id}
+                  onClick={() => setFilter(stat.name)}
+                  className={cn(
+                    "px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all",
+                    filter === stat.name ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" : "bg-white/60 text-slate-600 hover:bg-white"
+                  )}
+                >
+                  {stat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-white/40">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Billing:</span>
+              <select 
+                value={paymentFilter}
+                onChange={(e) => setPaymentFilter(e.target.value)}
+                className="bg-white/60 border border-white/80 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+                <option value="All">All Billing</option>
+                <option value="Paid">Paid</option>
+                <option value="Pending">Pending</option>
+                <option value="Failed">Failed</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Services:</span>
+              <button 
+                onClick={() => setServiceFilter(!serviceFilter)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-bold transition-all border",
+                  serviceFilter 
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-700 shadow-sm" 
+                    : "bg-white/60 border-white/80 text-slate-400 hover:text-slate-600"
+                )}
+              >
+                {serviceFilter ? "Active Services Only ✅" : "Show All Services"}
+              </button>
+            </div>
+
+            <div className="ml-auto text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              Showing {clients.length} of {total} clients
+            </div>
           </div>
         </div>
 
@@ -346,9 +395,9 @@ export default function ClientsPage() {
                 >
                   <Link 
                     href={`/clients/${client.id}`}
-                    className="block h-full bg-white/60 backdrop-blur-md border border-white/80 rounded-[2rem] p-6 hover:shadow-[0_12px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden"
+                    className="block h-full glass-premium glass-premium-hover rounded-[2.5rem] p-6 group relative overflow-hidden"
                   >
-                    <div className="absolute -right-8 -top-8 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 rounded-full blur-xl group-hover:scale-150 transition-transform"></div>
+                    <div className="absolute -right-8 -top-8 w-24 h-24 bg-gradient-to-br from-indigo-500/5 to-cyan-500/5 rounded-full blur-xl group-hover:scale-150 transition-all duration-500"></div>
                     
                     <div className="flex justify-between items-start mb-6 relative z-10">
                       <div>
@@ -446,6 +495,41 @@ export default function ClientsPage() {
                 <p className="text-slate-500 mt-2 font-medium max-w-sm">Try adjusting your search query or filters to find what you're looking for.</p>
               </div>
             )}
+          </div>
+        </div>
+        <div className="p-6 bg-white/10 backdrop-blur-md border-t border-white/60 flex items-center justify-between">
+          <div className="flex gap-2">
+            <button 
+              disabled={page === 0}
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              className="px-4 py-2 bg-white/60 border border-white/80 rounded-xl text-xs font-bold text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition-all shadow-sm"
+            >
+              Previous
+            </button>
+            <button 
+              disabled={clients.length < limit || (page + 1) * limit >= total}
+              onClick={() => setPage(p => p + 1)}
+              className="px-4 py-2 bg-white/60 border border-white/80 rounded-xl text-xs font-bold text-slate-600 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition-all shadow-sm"
+            >
+              Next
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            {[...Array(Math.ceil(total / limit))].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i)}
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-all",
+                  page === i 
+                    ? "bg-indigo-600 text-white shadow-md" 
+                    : "bg-white/40 text-slate-400 hover:bg-white hover:text-slate-600"
+                )}
+              >
+                {i + 1}
+              </button>
+            )).slice(0, 5)}
+            {total > limit * 5 && <span className="text-slate-400 text-xs font-bold px-1">...</span>}
           </div>
         </div>
       </motion.div>

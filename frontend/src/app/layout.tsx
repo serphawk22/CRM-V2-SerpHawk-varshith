@@ -9,10 +9,10 @@ import { AdminTopbar } from "@/components/AdminTopbar";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
 
 function AdminMainContent({ children }: { children: React.ReactNode }) {
-  const { collapsed } = useSidebar();
+  const { collapsed, isMobile } = useSidebar();
   return (
-    <main className={`relative z-10 pt-16 min-h-screen transition-all duration-300 ${collapsed ? "md:ml-[72px]" : "md:ml-[260px]"}`}>
-      <div className="p-6 md:p-8 max-w-[1600px] mx-auto">
+    <main className={`relative z-10 pt-16 min-h-screen transition-all duration-300 ${isMobile ? "ml-0" : (collapsed ? "ml-[72px]" : "ml-[260px]")}`}>
+      <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
         {children}
       </div>
     </main>
@@ -20,12 +20,12 @@ function AdminMainContent({ children }: { children: React.ReactNode }) {
 }
 
 function ClientLayout({ children }: { children: React.ReactNode }) {
-  const { collapsed } = useSidebar();
+  const { collapsed, isMobile } = useSidebar();
   return (
     <div className="client-shell relative w-full min-h-screen bg-zinc-950">
       <ClientSidebar />
       <CallNotificationBar />
-      <main className={`min-h-screen transition-all duration-300 pt-6 px-4 md:px-6 ${collapsed ? "ml-[72px]" : "ml-[220px]"}`}>
+      <main className={`min-h-screen transition-all duration-300 pt-6 px-4 md:px-6 ${isMobile ? "ml-0" : (collapsed ? "ml-[72px]" : "ml-[220px]")}`}>
         {children}
       </main>
       <Chatbot />
