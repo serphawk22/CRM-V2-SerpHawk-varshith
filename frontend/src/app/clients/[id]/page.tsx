@@ -131,6 +131,7 @@ export default function ClientDetailPage() {
   const [newKeyword, setNewKeyword] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const { role } = useRole();
+  const [relatedClients, setRelatedClients] = useState<any[]>([]);
   const [isMilestoneModalOpen, setIsMilestoneModalOpen] = useState(false);
   const [milestoneData, setMilestoneData] = useState({
     nextMilestone: '',
@@ -175,6 +176,7 @@ export default function ClientDetailPage() {
         fetchStatuses(),
         fetchServiceRequests(),
         fetchTimeline(),
+        fetchRelatedClients(),
       ]).finally(() => setPageLoading(false));
     }
   }, [id]);
@@ -290,6 +292,18 @@ export default function ClientDetailPage() {
       if (res.ok) {
         const data = await res.json();
         setTimeline(data.timeline || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchRelatedClients = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/clients?limit=5`);
+      if (res.ok) {
+        const data = await res.json();
+        setRelatedClients((data.clients || []).filter((c: any) => c.id !== Number(id)).slice(0, 4));
       }
     } catch (err) {
       console.error(err);
@@ -478,6 +492,21 @@ export default function ClientDetailPage() {
               <p className="text-xl text-white/90 font-medium max-w-2xl">
                 Your intelligent growth partner is ready to scale your business to new heights. Let's unlock extraordinary results together.
               </p>
+              
+              <div className="flex gap-4 mt-8">
+                <button 
+                  onClick={() => router.push('/messages')}
+                  className="px-8 py-3 bg-white text-indigo-600 font-black rounded-2xl shadow-xl hover:shadow-white/20 hover:-translate-y-0.5 transition-all flex items-center gap-2"
+                >
+                  <Send className="w-5 h-5" /> Start Outreach
+                </button>
+                <button 
+                  onClick={() => setActiveTab('activity')}
+                  className="px-8 py-3 bg-white/20 backdrop-blur-md text-white border border-white/30 font-black rounded-2xl hover:bg-white/30 transition-all"
+                >
+                  View Timeline
+                </button>
+              </div>
             </motion.div>
 
             {/* Stats Preview */}
@@ -1005,6 +1034,51 @@ export default function ClientDetailPage() {
                 })
               )}
             </div>
+          </div>
+        </motion.div>
+
+        {/* RELATED CLIENTS / INDUSTRY PARTNERS */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 1.6 }}
+           className="mb-20"
+        >
+          <div className="flex items-center gap-3 mb-8">
+            <div className="h-1 w-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full"></div>
+            <h2 className="text-2xl font-black text-slate-800 uppercase tracking-wider">Similar Industry Partners</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedClients.map((rc: any) => (
+              <motion.div
+                key={rc.id}
+                whileHover={{ y: -5 }}
+                className="bg-white/60 backdrop-blur-md border border-white/80 p-6 rounded-3xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
+                onClick={() => router.push(`/clients/${rc.id}`)}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center font-black group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    {rc.companyName?.charAt(0) || 'C'}
+                  </div>
+                  <div className="min-w-0" style={{ maxWidth: '140px' }}>
+                    <h4 className="font-bold text-slate-800 truncate">{rc.companyName}</h4>
+                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{rc.status}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                  <span className="text-[10px] font-bold text-slate-500 flex items-center gap-1">
+                    <Globe className="w-3 h-3" /> Visit Profile
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                </div>
+              </motion.div>
+            ))}
+            {relatedClients.length === 0 && (
+              <div className="col-span-full py-12 text-center bg-white/40 border border-dashed border-slate-200 rounded-3xl">
+                <p className="text-slate-400 font-bold">No similar partners found yet.</p>
+              </div>
+            )}
           </div>
         </motion.div>
 

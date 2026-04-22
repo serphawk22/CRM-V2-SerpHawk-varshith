@@ -992,7 +992,24 @@ def add_client_remark(
     )
     session.add(r)
     session.commit()
-    session.refresh(r)
+    session.refresh(msg)
+    
+    # Update client activity & AI Funnel Step
+    if thread.client_id:
+        client = session.get(ClientProfile, thread.client_id)
+        if client:
+            client.lastActivity = f"Message: {thread.service_name}"
+            client.lastActivityDate = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            client.lastActivityComment = body.content[:200] + ("..." if len(body.content) > 200 else "")
+            
+            # AI-powered funnel step detection
+            new_stage = detect_funnel_step(body.content)
+            if new_stage and new_stage != client.funnelStep:
+                client.funnelStep = new_stage
+                
+            session.add(client)
+            session.commit()
+
     return {
         "id": r.id,
         "content": r.content,
@@ -1450,6 +1467,23 @@ def send_message(body: SendMessageRequest, session: Session = Depends(get_sessio
     session.add(msg)
     session.commit()
     session.refresh(msg)
+    
+    # Update client activity
+    if thread.client_id:
+        client = session.get(ClientProfile, thread.client_id)
+        if client:
+            client.lastActivity = f"Message: {thread.service_name}"
+            client.lastActivityDate = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            client.lastActivityComment = body.content[:200] + ("..." if len(body.content) > 200 else "")
+            
+            # AI Funnel Detection
+            new_stage = detect_funnel_step(body.content)
+            if new_stage and new_stage != client.funnelStep:
+                client.funnelStep = new_stage
+                
+            session.add(client)
+            session.commit()
+
     return {
         "id": msg.id,
         "sender": _get_sender_name(msg.sender_id, session),
@@ -1716,87 +1750,11 @@ def list_email_drafts(client_id: int = None, session: Session = Depends(get_sess
             "sent_at": d.sent_at.isoformat() if d.sent_at else None
         } for d in drafts
     ]}
-        # Provide default subject and content if missing, so frontend always gets a visible draft
-        # Build the draft object for both outreach and inbound
-        draft_obj = {
-            "outreach": {
-                "subject": outreach_subject,
-                "english_body": outreach_body_en,
-                "spanish_body": outreach_body_es,
-            },
-            "inbound": {
-                "subject": inbound_subject,
-                "english_body": inbound_body_en,
-                "spanish_body": inbound_body_es,
-            },
-            "company_name": company_name,
-            "services": services,
-                "to_email": company_email or body.to_email,
-            "manual": body.manual,
-            "sent_at": datetime.utcnow().isoformat(),
-            "client_id": body.client_id
-        }
-        # Always save the email and log activity, even if some fields are missing
-        client_id = body.client_id
-        if not client_id:
-            from database import ClientProfile
-            # Try to find existing client by email
-            existing_client = session.exec(select(ClientProfile).where(ClientProfile.email == body.to_email)).first() if hasattr(ClientProfile, 'email') else None
-            if existing_client:
-                client_id = existing_client.id
-            else:
-                # Create new client profile
-                cp = ClientProfile(
-                    companyName=draft_obj["company_name"] or "Unknown Company",
-                    email=body.to_email or f"unknown_contact_{datetime.utcnow().timestamp()}@placeholder.com",
-                    status="Active"
-                )
-                session.add(cp)
-                session.commit()
-                session.refresh(cp)
-                client_id = cp.id
-        # Save the outreach draft to DB, using placeholders if needed
-        email_db_obj = {
-            "to_email": body.to_email or f"unknown_contact_{datetime.utcnow().timestamp()}@placeholder.com",
-            "subject": draft_obj["outreach"].get("subject") or "[No Subject]",
-            "english_body": draft_obj["outreach"].get("english_body") or "[No Body]",
-            "spanish_body": draft_obj["outreach"].get("spanish_body") or "[No Spanish Body]",
-            "recommended_services": draft_obj.get("services") or "",
-            "manual": body.manual,
-            "draft_json": json.dumps(draft_obj),
-            "sent_at": draft_obj["sent_at"],
-            "client_id": client_id
-        }
-        sent_email = SentEmail(**email_db_obj)
-        session.add(sent_email)
-        session.commit()
-        session.refresh(sent_email)
-
-        # --- Log activity for this client ---
-        from database import ActivityLog
-        activity = ActivityLog(
-            clientId=client_id,
-            action="Email Generated",
-            method="Email",
-            content=f"Generated outreach email for {draft_obj.get('company_name') or '[Unknown Company]'} ({body.company_url or ''}) to {body.to_email or '[Unknown Email]'}",
-            details=draft_obj["outreach"].get("subject") or "[No Subject]"
-        )
-        session.add(activity)
-        session.commit()
-
-        # Schedule LLM draft generation in the background if needed
-        if background_tasks is not None:
-            background_tasks.add_task(generate_llm_draft_task, sent_email.id, body.dict())
-
-        return {"ok": True, "email_id": sent_email.id, "draft": draft_obj, "client_id": client_id}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 # Background task to update SentEmail with LLM-generated draft
 def generate_llm_draft_task(sent_email_id, body_dict):
     import time
     import json
-    from modules.llm_engine import analyze_content, generate_email as llm_generate_email
+    from modules.llm_engine import analyze_content, generate_email, analyze_document, detect_funnel_step
     from modules.scraper import scrape_website
     from database import Session, SentEmail, engine
     session = Session(engine)
@@ -1804,7 +1762,7 @@ def generate_llm_draft_task(sent_email_id, body_dict):
         # Scrape and analyze
         text = scrape_website(body_dict.get("company_url", "")) if body_dict.get("company_url") else ""
         analysis = analyze_content(text) if text else {}
-        llm_result = llm_generate_email(analysis, None)
+        llm_result = generate_email(analysis, None)
         # Update SentEmail record
         sent_email = session.get(SentEmail, sent_email_id)
         if sent_email:
@@ -2600,6 +2558,23 @@ def add_task_comment(
     session.commit()
     session.refresh(c)
     author = session.get(User, c.author_id) if c.author_id else None
+    
+    # Update client activity
+    if t.client_id:
+        client = session.get(ClientProfile, t.client_id)
+        if client:
+            client.lastActivity = f"Task Comment: {t.title}"
+            client.lastActivityDate = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            client.lastActivityComment = body.content[:200] + ("..." if len(body.content) > 200 else "")
+            
+            # AI Funnel Detection
+            new_stage = detect_funnel_step(body.content)
+            if new_stage and new_stage != client.funnelStep:
+                client.funnelStep = new_stage
+                
+            session.add(client)
+            session.commit()
+
     return {
         "id": c.id,
         "content": c.content,
@@ -3538,6 +3513,24 @@ async def ws_chat(websocket: WebSocket, thread_id: int):
                     session.commit()
                     session.refresh(msg)
                     sender = session.get(User, msg.sender_id)
+
+                    # Update client activity & AI Funnel Step
+                    thread = session.get(MessageThread, thread_id)
+                    if thread and thread.client_id:
+                        client_prof = session.get(ClientProfile, thread.client_id)
+                        if client_prof:
+                            client_prof.lastActivity = f"Message: {thread.service_name}"
+                            client_prof.lastActivityDate = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+                            client_prof.lastActivityComment = msg.content[:200] + ("..." if len(msg.content) > 200 else "")
+                            
+                            # AI-powered funnel step detection
+                            new_stage = detect_funnel_step(msg.content)
+                            if new_stage and new_stage != client_prof.funnelStep:
+                                client_prof.funnelStep = new_stage
+                                
+                            session.add(client_prof)
+                            session.commit()
+
                     payload = {
                         "type": "new_message",
                         "message": {

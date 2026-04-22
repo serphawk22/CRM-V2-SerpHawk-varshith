@@ -217,12 +217,26 @@ export function AdminTopbar() {
                   <p className="text-[10px] text-slate-400">{unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}</p>
                 </div>
                 {recentNotifs.length > 0 ? recentNotifs.map((n: any) => (
-                  <div key={n.id} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer">
-                    <span className="text-lg mt-0.5">
+                  <div 
+                    key={n.id} 
+                    onClick={() => {
+                      setNotifOpen(false);
+                      // Deep Link Logic
+                      if (n.link) {
+                        router.push(n.link);
+                      } else if (n.title.toLowerCase().includes('client') && n.client_id) {
+                        router.push(`/clients/${n.client_id}`);
+                      } else if (n.title.toLowerCase().includes('task')) {
+                        router.push('/tasks');
+                      }
+                    }}
+                    className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer group"
+                  >
+                    <span className="text-lg mt-0.5 group-hover:scale-110 transition-transform">
                       {n.type === "success" ? "✅" : n.type === "warning" ? "⚠️" : n.type === "error" ? "❌" : "🔔"}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-bold text-slate-700">{n.title}</p>
+                      <p className="text-[12px] font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">{n.title}</p>
                       <p className="text-[11px] text-slate-400 truncate">{n.message}</p>
                     </div>
                     <div className="flex items-center gap-1 shrink-0 text-[10px] text-slate-400">

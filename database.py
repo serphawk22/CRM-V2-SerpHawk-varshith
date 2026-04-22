@@ -203,6 +203,8 @@ class ClientProfile(SQLModel, table=True):
     nextMilestoneDate: Optional[str] = None
     lastActivity: Optional[str] = None
     lastActivityDate: Optional[str] = None
+    lastActivityComment: Optional[str] = Field(default=None, sa_column=Column(Text))
+    funnelStep: Optional[str] = Field(default="Prospect", index=True) # Prospect, Lead, Negotiation, Closed-Won, Closed-Lost
     
     # SEO Client Management Tool Workflow fields
     payment_status: str = Field(default="Pending") # Pending, Paid, Failed
@@ -617,6 +619,8 @@ def create_db_and_tables():
         "ALTER TABLE client_profiles ADD COLUMN \"nextMilestoneDate\" VARCHAR(255)",
         "ALTER TABLE client_profiles ADD COLUMN \"lastActivity\" VARCHAR(500)",
         "ALTER TABLE client_profiles ADD COLUMN \"lastActivityDate\" VARCHAR(255)",
+        "ALTER TABLE client_profiles ADD COLUMN \"lastActivityComment\" TEXT",
+        "ALTER TABLE client_profiles ADD COLUMN \"funnelStep\" VARCHAR(50) DEFAULT 'Prospect'",
         "ALTER TABLE client_profiles ADD COLUMN \"services_offered\" TEXT",
         "ALTER TABLE client_profiles ADD COLUMN \"services_requested\" TEXT",
         "ALTER TABLE client_profiles ADD COLUMN \"outbound_email_sent\" BOOLEAN DEFAULT FALSE",

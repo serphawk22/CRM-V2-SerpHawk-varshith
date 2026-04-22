@@ -73,6 +73,7 @@ export default function ClientsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [funnelFilter, setFunnelFilter] = useState('All');
   const [formData, setFormData] = useState({
     companyName: '',
     websiteUrl: '',
@@ -131,11 +132,11 @@ export default function ClientsPage() {
 
   useEffect(() => {
     setPage(0);
-  }, [filter, paymentFilter, serviceFilter, search]);
+  }, [filter, paymentFilter, serviceFilter, search, funnelFilter]);
 
   useEffect(() => {
     fetchClients();
-  }, [filter, paymentFilter, serviceFilter, page]);
+  }, [filter, paymentFilter, serviceFilter, page, funnelFilter]);
 
   const fetchStatuses = async () => {
     try {
@@ -154,6 +155,7 @@ export default function ClientsPage() {
       
       if (filter !== 'All') url += `&status=${filter}`;
       if (paymentFilter !== 'All') url += `&payment_status=${paymentFilter}`;
+      if (funnelFilter !== 'All') url += `&funnel_step=${funnelFilter}`;
       if (serviceFilter) url += `&has_active_services=true`;
       
       const res = await fetch(url);
@@ -358,6 +360,22 @@ export default function ClientsPage() {
             </div>
 
             <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Funnel:</span>
+              <select 
+                value={funnelFilter}
+                onChange={(e) => setFunnelFilter(e.target.value)}
+                className="bg-white/60 border border-white/80 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/20"
+              >
+                <option value="All">All Stages</option>
+                <option value="Prospect">Prospect</option>
+                <option value="Lead">Lead</option>
+                <option value="Negotiation">Negotiation</option>
+                <option value="Closed-Won">Won</option>
+                <option value="Closed-Lost">Lost</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Services:</span>
               <button 
                 onClick={() => setServiceFilter(!serviceFilter)}
@@ -421,7 +439,24 @@ export default function ClientsPage() {
                     <div className="space-y-4 relative z-10">
                       <div className="flex items-center gap-3 text-sm text-slate-600 bg-white/50 p-3 rounded-2xl border border-white/40">
                         <div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-lg"><Globe className="w-4 h-4" /></div>
-                        <span className="truncate font-medium">{client.website || 'No website'}</span>
+                        <span className="truncate font-medium">{client.websiteUrl || client.website || 'No website'}</span>
+                        {(!client.websiteUrl && !client.website) && client.email && (
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const domain = client.email.split('@')[1];
+                              if (domain) {
+                                setFormData(prev => ({ ...prev, websiteUrl: `https://www.${domain}` }));
+                                setIsModalOpen(true);
+                              }
+                            }}
+                            className="ml-auto p-1 bg-cyan-100 text-cyan-600 rounded-full hover:bg-cyan-200 transition-colors"
+                            title="Predict Website from Email"
+                          >
+                            <Zap className="w-3 h-3" />
+                          </button>
+                        )}
                       </div>
 
                       <div className="flex items-center gap-3 text-sm text-slate-600 bg-white/50 p-3 rounded-2xl border border-white/40">
@@ -429,6 +464,9 @@ export default function ClientsPage() {
                         <div className="flex flex-col">
                            <span className="font-bold text-[10px] uppercase tracking-wider text-slate-400">Last Activity</span>
                            <span className="truncate font-medium">{client.lastActivity || 'No activities yet'}</span>
+                           {client.funnelStep && (
+                             <span className="text-[9px] font-black text-indigo-500 uppercase bg-indigo-50 px-1.5 py-0.5 rounded-full w-fit mt-1 border border-indigo-100">AI: {client.funnelStep}</span>
+                           )}
                         </div>
                       </div>
                     </div>
@@ -467,7 +505,10 @@ export default function ClientsPage() {
                               <Activity className="w-3.5 h-3.5 text-indigo-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-bold text-sm text-white leading-snug line-clamp-2">{client.lastActivity}</p>
+                               <p className="font-bold text-sm text-white leading-snug line-clamp-1">{client.lastActivity}</p>
+                               {client.lastActivityComment && (
+                                 <p className="text-[11px] text-slate-300 italic mt-1 line-clamp-2">"{client.lastActivityComment}"</p>
+                               )}
                               {client.lastActivityDate && (
                                 <p className="text-[11px] text-slate-400 font-medium mt-1 flex items-center gap-1">
                                   <Clock className="w-3 h-3" />

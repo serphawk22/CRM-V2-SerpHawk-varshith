@@ -231,3 +231,42 @@ def analyze_document(image_bytes):
                     "website": ""
                 }
             continue
+
+def detect_funnel_step(text):
+    """
+    Analyzes message history or a single message to determine the sales funnel step.
+    Returns: Prospect, Lead, Negotiation, Closed-Won, Closed-Lost
+    """
+    try:
+        client = get_openai_client()
+        prompt = f"""
+        Analyze the following conversation context and determine the current sales funnel stage for the client.
+        
+        STAGES:
+        1. Prospect: Just identified, no real interaction yet.
+        2. Lead: Has responded, showing interest or asking general questions.
+        3. Negotiation: Discussing pricing, specific services, or terms of a proposal.
+        4. Closed-Won: Has agreed to pay, signed a contract, or explicitly confirmed engagement.
+        5. Closed-Lost: Has explicitly declined or hasn't responded to multiple attempts.
+        
+        Return a JSON object with:
+        {{
+            "predicted_stage": "One of the 5 stages above",
+            "reasoning": "A short sentence explaining why"
+        }}
+        
+        CONTEXT:
+        {text[:5000]}
+        """
+        
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
+        )
+        
+        result = json.loads(response.choices[0].message.content)
+        return result.get("predicted_stage", "Prospect")
+    except Exception as e:
+        print(f"Error in funnel detection: {e}")
+        return "Prospect"
