@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 from database import engine, SentEmail
 from sqlalchemy.orm import joinedload
+from sqlalchemy import func
 from sqlmodel import select
 
 def register_sent_emails_endpoint(app, get_session):
