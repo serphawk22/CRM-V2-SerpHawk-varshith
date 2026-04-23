@@ -81,7 +81,7 @@ export default function EducationPage() {
           {activeTab === 'videos' ? (
             <motion.div key="videos" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVideos.map((video, i) => (
-                <div key={i} className="group bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all cursor-pointer">
+                <a key={i} href={video.url} className="group bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all cursor-pointer block">
                   <div className="h-48 relative overflow-hidden">
                     <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -95,13 +95,13 @@ export default function EducationPage() {
                     <div className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">{video.category}</div>
                     <h3 className="text-lg font-bold text-white group-hover:text-amber-400 transition-colors">{video.title}</h3>
                   </div>
-                </div>
+                </a>
               ))}
             </motion.div>
           ) : (
             <motion.div key="blogs" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBlogs.map((blog, i) => (
-                <div key={i} className="group bg-zinc-900 border border-white/5 rounded-2xl p-6 hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between h-full">
+                <a key={i} href={blog.url} className="group bg-zinc-900 border border-white/5 rounded-2xl p-6 hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between h-full block">
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500">{blog.category}</div>
@@ -113,7 +113,7 @@ export default function EducationPage() {
                     <span>{blog.date}</span>
                     <span className="flex items-center gap-1.5"><BookOpen className="w-4 h-4" /> {blog.readTime}</span>
                   </div>
-                </div>
+                </a>
               ))}
             </motion.div>
           )}
