@@ -58,10 +58,10 @@ export default function AuditPage() {
         title="How SEO Audits work"
         description="Run a comprehensive technical SEO analysis on any domain to identify issues and opportunities."
         steps={[
-          { icon: '🌐', text: 'Type any domain in the input box and click \"Run Audit\" to begin the analysis.' },
-          { icon: '📊', text: 'The audit checks page speed, meta tags, headings, links, images, and more.' },
-          { icon: '🟢', text: 'Scores are color-coded: green (80+) is great, amber (50-79) needs work, red (<50) is critical.' },
-          { icon: '⬇️', text: 'Download the full audit report as a PDF for detailed review and client presentations.' },
+          { icon: <Globe size={32} />, text: 'Type any domain in the input box and click "Run Audit" to begin the analysis.' },
+          { icon: <Activity size={32} />, text: 'The audit checks page speed, meta tags, headings, links, images, and more.' },
+          { icon: <CheckCircle size={32} />, text: 'Scores are color-coded: green (80+) is great, amber (50-79) needs work, red (<50) is critical.' },
+          { icon: <Download size={32} />, text: 'Download the full audit report as a PDF for detailed review and client presentations.' },
         ]}
       />
 

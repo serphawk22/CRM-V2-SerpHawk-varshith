@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShoppingBag, Star, Zap, Users, CheckCircle, ArrowRight, 
   Sparkles, Shield, Clock, ChevronRight, ExternalLink, FileText, Send,
-  TrendingUp, Award, Gem
+  TrendingUp, Award, Gem, Mail
 } from 'lucide-react';
 import { API_BASE_URL } from '@/config';
 import { fetchWithCache } from '@/lib/cache';
@@ -208,10 +208,10 @@ export default function ClientStorePage() {
               title="How the Service Store works"
               description="Browse premium growth services, request quotes, and manage your active orders."
               steps={[
-                { icon: '🛒', text: 'Browse the Service Catalog tab to see all available services with descriptions and pricing.' },
-                { icon: '📝', text: 'Click "Request Quote" on any service — our team will send you a personalized quote.' },
-                { icon: '📩', text: 'Switch to "My Requests" tab to see all your requests, quotes received, and accepted services.' },
-                { icon: '✅', text: 'When you receive a quote, you can "Accept" to proceed or "Decline" if it\'s not the right fit.' },
+                { icon: <ShoppingBag size={32} />, text: 'Browse the Service Catalog tab to see all available services with descriptions and pricing.' },
+                { icon: <FileText size={32} />, text: 'Click "Request Quote" on any service — our team will send you a personalized quote.' },
+                { icon: <Mail size={32} />, text: 'Switch to "My Requests" tab to see all your requests, quotes received, and accepted services.' },
+                { icon: <CheckCircle size={32} />, text: 'When you receive a quote, you can "Accept" to proceed or "Decline" if it\'s not the right fit.' },
               ]}
             />
           </div>

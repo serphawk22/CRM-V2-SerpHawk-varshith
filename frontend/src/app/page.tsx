@@ -216,10 +216,10 @@ export default function Dashboard() {
             title="Welcome to Operations Center"
             description="This is your command hub — everything you need to run the business is accessible from here."
             steps={[
-              { icon: '📊', text: 'The stat cards at the top show live metrics: clients, projects, emails, calls, and revenue.' },
-              { icon: '📇', text: 'Navigation cards below let you jump to any section: Client Hub, Email Agent, Call Center, etc.' },
-              { icon: '⚙️', text: 'Use the sidebar to navigate between pages, or click the quick-access cards here.' },
-              { icon: '🔔', text: 'Check Notifications (bell icon) for real-time alerts about client activity and proposals.' },
+              { icon: <Activity size={32} />, text: 'The stat cards at the top show live metrics: clients, projects, emails, calls, and revenue.' },
+              { icon: <Briefcase size={32} />, text: 'Navigation cards below let you jump to any section: Client Hub, Email Agent, Call Center, etc.' },
+              { icon: <Globe size={32} />, text: 'Use the sidebar to navigate between pages, or click the quick-access cards here.' },
+              { icon: <Bell size={32} />, text: 'Check Notifications (bell icon) for real-time alerts about client activity and proposals.' },
             ]}
           />
 
@@ -404,10 +404,10 @@ export default function Dashboard() {
               title="Welcome to Your Growth Dashboard"
               description="This is your personal hub — track your SEO campaign, manage services, and communicate with your team."
               steps={[
-                { icon: '🏠', text: 'Scroll down to see your quick-access cards: Setup, Audit, Messages, Monitor, Store, and more.' },
-                { icon: '🛒', text: 'Visit the Store to browse services, request quotes, and track your active orders.' },
-                { icon: '💬', text: 'Use Messages to communicate with your dedicated team about ongoing services.' },
-                { icon: '📈', text: 'Check Monitor for live analytics, Rankings for keyword positions, and Audit for site health.' },
+                { icon: <Users size={32} />, text: 'Scroll down to see your quick-access cards: Setup, Audit, Messages, Monitor, Store, and more.' },
+                { icon: <Briefcase size={32} />, text: 'Visit the Store to browse services, request quotes, and track your active orders.' },
+                { icon: <MessageCircle size={32} />, text: 'Use Messages to communicate with your dedicated team about ongoing services.' },
+                { icon: <TrendingUp size={32} />, text: 'Check Monitor for live analytics, Rankings for keyword positions, and Audit for site health.' },
               ]}
             />
           </div>

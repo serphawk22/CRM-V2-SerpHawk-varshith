@@ -66,6 +66,7 @@ const NAV_ITEMS: NavItem[] = [
   { name: "Rankings", icon: BarChart2, href: "/rankings", roles: ["Admin", "Employee"], section: "Tools", badge: "New", badgeColor: "emerald" },
   { name: "Audit", icon: Activity, href: "/audit", roles: ["Employee"], section: "Tools" },
   { name: "Pricing", icon: Zap, href: "/pricing", roles: ["Employee"], section: "Tools" },
+  { name: "Education", icon: GraduationCap, href: "/education", roles: ["Admin", "Employee", "Intern"], section: "Tools" },
 ];
 
 const SECTIONS = [

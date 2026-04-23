@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, HelpCircle, X } from 'lucide-react';
 
 interface GuideStep {
-  icon: string;
+  icon: React.ReactNode | string;
   text: string;
+  image?: string;
 }
 
 interface PageGuideProps {
@@ -163,9 +164,15 @@ export default function PageGuide({ pageKey, title, description, steps }: PageGu
                       </>
                     ) : (
                       <>
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-50 mb-4">
-                          <span className="text-4xl">{steps[currentStep - 1].icon}</span>
-                        </div>
+                        {steps[currentStep - 1].image ? (
+                          <div className="mb-4 rounded-xl overflow-hidden shadow-sm border border-slate-100">
+                             <img src={steps[currentStep - 1].image} alt="Step illustration" className="w-full h-auto object-cover" />
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-50 mb-4 text-indigo-500">
+                            <span className="text-4xl flex items-center justify-center">{steps[currentStep - 1].icon}</span>
+                          </div>
+                        )}
                         <p className="text-[13px] text-gray-700 leading-relaxed max-w-xs mx-auto font-medium">{steps[currentStep - 1].text}</p>
                       </>
                     )}

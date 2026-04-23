@@ -154,13 +154,18 @@ export default function ClientDetailPage() {
     total_visitors: '', engagement_rate: '', avg_time_on_site: '',
   });
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileForm, setProfileForm] = useState({ companyName: '', projectName: '', websiteUrl: '' });
+  const [profileForm, setProfileForm] = useState({ companyName: '', projectName: '', websiteUrl: '', phone: '', address: '', gmbName: '', seoStrategy: '', tagline: '' });
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     await updateProfile({
       companyName: profileForm.companyName,
       projectName: profileForm.projectName,
-      websiteUrl: profileForm.websiteUrl
+      websiteUrl: profileForm.websiteUrl,
+      phone: profileForm.phone,
+      address: profileForm.address,
+      gmbName: profileForm.gmbName,
+      seoStrategy: profileForm.seoStrategy,
+      tagline: profileForm.tagline
     });
     setIsEditingProfile(false);
   };
@@ -687,35 +692,90 @@ export default function ClientDetailPage() {
                         <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Website</label>
                         <input className="w-full px-3 py-2 rounded-xl border border-purple-200 font-black text-purple-700 bg-white" value={profileForm.websiteUrl} onChange={e => setProfileForm({ ...profileForm, websiteUrl: e.target.value })} />
                       </motion.div>
+                      <motion.div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+                        <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Phone</label>
+                        <input className="w-full px-3 py-2 rounded-xl border border-emerald-200 font-black text-emerald-700 bg-white" value={profileForm.phone} onChange={e => setProfileForm({ ...profileForm, phone: e.target.value })} />
+                      </motion.div>
+                      <motion.div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                        <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Address</label>
+                        <input className="w-full px-3 py-2 rounded-xl border border-amber-200 font-black text-amber-700 bg-white" value={profileForm.address} onChange={e => setProfileForm({ ...profileForm, address: e.target.value })} />
+                      </motion.div>
+                      <motion.div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl">
+                        <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">GMB Name</label>
+                        <input className="w-full px-3 py-2 rounded-xl border border-rose-200 font-black text-rose-700 bg-white" value={profileForm.gmbName} onChange={e => setProfileForm({ ...profileForm, gmbName: e.target.value })} />
+                      </motion.div>
+                      <motion.div className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl">
+                        <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">SEO Strategy</label>
+                        <textarea className="w-full px-3 py-2 rounded-xl border border-indigo-200 font-black text-indigo-700 bg-white" value={profileForm.seoStrategy} onChange={e => setProfileForm({ ...profileForm, seoStrategy: e.target.value })} />
+                      </motion.div>
+                      <motion.div className="p-4 bg-teal-50 border border-teal-200 rounded-2xl">
+                        <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Tagline</label>
+                        <input className="w-full px-3 py-2 rounded-xl border border-teal-200 font-black text-teal-700 bg-white" value={profileForm.tagline} onChange={e => setProfileForm({ ...profileForm, tagline: e.target.value })} />
+                      </motion.div>
                       <div className="flex gap-2 pt-2">
                         <button type="button" onClick={() => setIsEditingProfile(false)} className="px-4 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold">Cancel</button>
                         <button type="submit" className="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-bold">Save</button>
                       </div>
                     </form>
                   ) : (
-                    <>
-                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.4 }} className="p-4 bg-cyan-50 border border-cyan-200 rounded-2xl hover:bg-cyan-100 transition-all flex justify-between items-center">
-                        <div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.4 }} className="p-4 bg-cyan-50 border border-cyan-200 rounded-2xl hover:bg-cyan-100 transition-all flex justify-between items-center group">
+                        <div className="w-full overflow-hidden">
                           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Company Name</p>
-                          <p className="text-xl font-black text-cyan-700">{client.companyName}</p>
+                          <p className="text-xl font-black text-cyan-700 truncate">{client.companyName || '—'}</p>
                         </div>
-                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '' }); }} className="ml-4 p-2 rounded-full bg-cyan-100 hover:bg-cyan-200"><Edit2 className="w-4 h-4 text-cyan-700" /></button>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-cyan-100 opacity-0 group-hover:opacity-100 transition-opacity"><Edit2 className="w-4 h-4 text-cyan-700" /></button>
                       </motion.div>
-                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.45 }} className="p-4 bg-blue-50 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-all flex justify-between items-center">
-                        <div>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.45 }} className="p-4 bg-blue-50 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-all flex justify-between items-center group">
+                        <div className="w-full overflow-hidden">
                           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Project Name</p>
-                          <p className="text-xl font-black text-blue-700">{client.projectName || 'Active Project'}</p>
+                          <p className="text-xl font-black text-blue-700 truncate">{client.projectName || '—'}</p>
                         </div>
-                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '' }); }} className="ml-4 p-2 rounded-full bg-blue-100 hover:bg-blue-200"><Edit2 className="w-4 h-4 text-blue-700" /></button>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-blue-100 opacity-0 group-hover:opacity-100 transition-opacity"><Edit2 className="w-4 h-4 text-blue-700" /></button>
                       </motion.div>
-                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5 }} className="p-4 bg-purple-50 border border-purple-200 rounded-2xl hover:bg-purple-100 transition-all flex justify-between items-center">
-                        <div>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5 }} className="p-4 bg-purple-50 border border-purple-200 rounded-2xl hover:bg-purple-100 transition-all flex justify-between items-center group">
+                        <div className="w-full overflow-hidden">
                           <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Website</p>
-                          <p className="text-lg font-black text-purple-700 truncate">{client.website || client.websiteUrl || 'www.yourwebsite.com'}</p>
+                          <p className="text-lg font-black text-purple-700 truncate">{client.website || client.websiteUrl || '—'}</p>
                         </div>
-                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '' }); }} className="ml-4 p-2 rounded-full bg-purple-100 hover:bg-purple-200"><Edit2 className="w-4 h-4 text-purple-700" /></button>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-purple-100 opacity-0 group-hover:opacity-100 transition-opacity"><Edit2 className="w-4 h-4 text-purple-700" /></button>
                       </motion.div>
-                    </>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.55 }} className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl hover:bg-emerald-100 transition-all flex justify-between items-center group">
+                        <div className="w-full overflow-hidden">
+                          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Phone</p>
+                          <p className="text-lg font-black text-emerald-700 truncate">{client.phone || '—'}</p>
+                        </div>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-emerald-100 opacity-0 group-hover:opacity-100 transition-opacity"><Edit2 className="w-4 h-4 text-emerald-700" /></button>
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.6 }} className="p-4 bg-amber-50 border border-amber-200 rounded-2xl hover:bg-amber-100 transition-all flex justify-between items-center group">
+                        <div className="w-full overflow-hidden">
+                          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Address</p>
+                          <p className="text-lg font-black text-amber-700 truncate">{client.address || '—'}</p>
+                        </div>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-amber-100 opacity-0 group-hover:opacity-100 transition-opacity"><Edit2 className="w-4 h-4 text-amber-700" /></button>
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.65 }} className="p-4 bg-rose-50 border border-rose-200 rounded-2xl hover:bg-rose-100 transition-all flex justify-between items-center group">
+                        <div className="w-full overflow-hidden">
+                          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">GMB Name</p>
+                          <p className="text-lg font-black text-rose-700 truncate">{client.gmbName || '—'}</p>
+                        </div>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-rose-100 opacity-0 group-hover:opacity-100 transition-opacity"><Edit2 className="w-4 h-4 text-rose-700" /></button>
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.7 }} className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl hover:bg-indigo-100 transition-all flex justify-between items-center group col-span-1 md:col-span-2">
+                        <div className="w-full overflow-hidden">
+                          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">SEO Strategy</p>
+                          <p className="text-sm font-black text-indigo-700">{client.seoStrategy || '—'}</p>
+                        </div>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-indigo-100 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"><Edit2 className="w-4 h-4 text-indigo-700" /></button>
+                      </motion.div>
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.75 }} className="p-4 bg-teal-50 border border-teal-200 rounded-2xl hover:bg-teal-100 transition-all flex justify-between items-center group col-span-1 md:col-span-2">
+                        <div className="w-full overflow-hidden">
+                          <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2">Tagline</p>
+                          <p className="text-lg font-black text-teal-700 truncate">{client.tagline || '—'}</p>
+                        </div>
+                        <button onClick={() => { setIsEditingProfile(true); setProfileForm({ companyName: client.companyName || '', projectName: client.projectName || '', websiteUrl: client.website || client.websiteUrl || '', phone: client.phone || '', address: client.address || '', gmbName: client.gmbName || '', seoStrategy: client.seoStrategy || '', tagline: client.tagline || '' }); }} className="ml-4 p-2 rounded-full bg-teal-100 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"><Edit2 className="w-4 h-4 text-teal-700" /></button>
+                      </motion.div>
+                    </div>
                   )}
                 </div>
               </div>

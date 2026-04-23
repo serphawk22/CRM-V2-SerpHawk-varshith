@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   Plus, X, Loader2, CheckCircle2, Clock, AlertCircle, Zap,
-  User, Calendar, Tag, Trash2, MessageSquare, ChevronDown
+  User, Calendar, Tag, Trash2, MessageSquare, ChevronDown, ClipboardList, RefreshCw
 } from "lucide-react";
 import { API_BASE_URL } from "@/config";
 import { cn } from "@/lib/utils";
@@ -164,15 +164,15 @@ export default function TasksPage() {
         title={isClient ? 'Understanding Your Tasks' : 'How the Task Board works'}
         description={isClient ? 'Here you can see all tasks related to your projects and services.' : 'A Kanban-style board to manage tasks across all clients and projects.'}
         steps={isClient ? [
-          { icon: '📋', text: 'Tasks are organized by status: To Do, In Progress, and Done.' },
-          { icon: '🏷️', text: 'Each task shows its priority level (Low, Medium, High, Urgent) with color coding.' },
-          { icon: '📅', text: 'Check due dates and descriptions to stay on top of deadlines.' },
-          { icon: '💬', text: 'Your team updates task progress as work moves forward on your services.' },
+          { icon: <ClipboardList size={32} />, text: 'Tasks are organized by status: To Do, In Progress, and Done.' },
+          { icon: <Tag size={32} />, text: 'Each task shows its priority level (Low, Medium, High, Urgent) with color coding.' },
+          { icon: <Calendar size={32} />, text: 'Check due dates and descriptions to stay on top of deadlines.' },
+          { icon: <MessageSquare size={32} />, text: 'Your team updates task progress as work moves forward on your services.' },
         ] : [
-          { icon: '➕', text: 'Click \"New Task\" to create a task and assign it to a client, project, or team member.' },
-          { icon: '🔄', text: 'Tasks are grouped by status columns: To Do, In Progress, and Done.' },
-          { icon: '🏷️', text: 'Set priorities (Low, Medium, High, Urgent) to keep the team focused on what matters.' },
-          { icon: '🗑️', text: 'Use the task menu to edit details, reassign, or delete tasks.' },
+          { icon: <Plus size={32} />, text: 'Click "New Task" to create a task and assign it to a client, project, or team member.' },
+          { icon: <RefreshCw size={32} />, text: 'Tasks are grouped by status columns: To Do, In Progress, and Done.' },
+          { icon: <Tag size={32} />, text: 'Set priorities (Low, Medium, High, Urgent) to keep the team focused on what matters.' },
+          { icon: <Trash2 size={32} />, text: 'Use the task menu to edit details, reassign, or delete tasks.' },
         ]}
       />
 

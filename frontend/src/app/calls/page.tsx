@@ -1,9 +1,9 @@
 "use client";
-
 import { useState, useEffect } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Phone, Plus, X, Clock, Loader2, Check, PhoneCall, PhoneOff, Zap,
+  Phone, Plus, X, Clock, Loader2, Check, PhoneCall, PhoneOff, Zap, Bot,
   User, FileText, Briefcase, CalendarClock, AlertCircle, ChevronDown, ChevronUp
 } from "lucide-react";
 import PageGuide from '@/components/PageGuide';
@@ -282,10 +282,10 @@ export default function CallsPage() {
         title="How the Call Log works"
         description="Record, summarize, and track follow-ups for every phone call with clients and leads."
         steps={[
-          { icon: '📞', text: 'Click \"Log Call\" to record a new call with the phone number, duration, and notes.' },
-          { icon: '🤖', text: 'Use \"AI Summarize\" to automatically generate a summary of the call from your notes.' },
-          { icon: '📅', text: 'Set follow-up dates and mark calls as needing follow-up to never miss a lead.' },
-          { icon: '📝', text: 'Click any call to expand details, see the full description, and edit information.' },
+          { icon: <Phone size={32} />, text: 'Click "Log Call" to record a new call with the phone number, duration, and notes.' },
+          { icon: <Bot size={32} />, text: 'Use "AI Summarize" to automatically generate a summary of the call from your notes.' },
+          { icon: <CalendarClock size={32} />, text: 'Set follow-up dates and mark calls as needing follow-up to never miss a lead.' },
+          { icon: <FileText size={32} />, text: 'Click any call to expand details, see the full description, and edit information.' },
         ]}
       />
 

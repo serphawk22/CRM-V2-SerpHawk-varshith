@@ -206,10 +206,10 @@ export default function EmailAgentPage() {
         title="How the Email Agent works"
         description="Our AI researches companies, matches them to your services, and drafts personalized outreach emails."
         steps={[
-          { icon: '🏢', text: 'Enter a company name and URL — the AI will analyze their website and identify opportunities.' },
-          { icon: '🧠', text: 'The agent matches the company\'s needs to your service catalog and crafts a tailored pitch.' },
-          { icon: '📧', text: 'Review the generated email in English and Spanish, then send it directly or copy the text.' },
-          { icon: '📊', text: 'Track all sent emails above — see counts for auto-sent vs. manually-sent outreach.' },
+          { icon: <Building2 size={32} />, text: 'Enter a company name and URL — the AI will analyze their website and identify opportunities.' },
+          { icon: <Bot size={32} />, text: 'The agent matches the company\'s needs to your service catalog and crafts a tailored pitch.' },
+          { icon: <Mail size={32} />, text: 'Review the generated email in English and Spanish, then send it directly or copy the text.' },
+          { icon: <TrendingUp size={32} />, text: 'Track all sent emails above — see counts for auto-sent vs. manually-sent outreach.' },
         ]}
       />
 

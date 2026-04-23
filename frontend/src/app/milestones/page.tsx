@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import {
-  Plus, X, Loader2, Target, CheckCircle, Clock, Zap, Trash2
+  Plus, X, Loader2, Target, CheckCircle, Clock, Zap, Trash2, TrendingUp, Calendar
 } from "lucide-react";
 import { API_BASE_URL } from "@/config";
 import { cn } from "@/lib/utils";
@@ -130,10 +130,10 @@ export default function MilestonesPage() {
         title="How Milestones work"
         description="Track key deliverables and achievements across your projects and services."
         steps={[
-          { icon: '🎯', text: 'Each milestone represents a key deliverable with a due date and completion status.' },
-          { icon: '🟢', text: 'Status indicators show Pending (waiting), In Progress (active), or Achieved (done).' },
-          { icon: '📊', text: 'The progress bar at the top shows overall completion across all milestones.' },
-          { icon: '📅', text: 'Due dates help you and your team stay on track with project timelines.' },
+          { icon: <Target size={32} />, text: 'Each milestone represents a key deliverable with a due date and completion status.' },
+          { icon: <CheckCircle size={32} />, text: 'Status indicators show Pending (waiting), In Progress (active), or Achieved (done).' },
+          { icon: <TrendingUp size={32} />, text: 'The progress bar at the top shows overall completion across all milestones.' },
+          { icon: <Calendar size={32} />, text: 'Due dates help you and your team stay on track with project timelines.' },
         ]}
       />
 

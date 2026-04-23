@@ -17,6 +17,7 @@ import {
   FileSignature,
   BarChart2,
   ChevronRight,
+  GraduationCap
 } from "lucide-react";
 import { useRole } from "@/context/RoleContext";
 import { useSidebar } from "@/context/SidebarContext";
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { icon: BarChart2, href: "/rankings", label: "Rankings" },
   { icon: Menu, href: "/messages", label: "Messages" },
   { icon: Target, href: "/milestones", label: "Milestones" },
+  { icon: GraduationCap, href: "/education", label: "Education" },
   { icon: Upload, href: "/my-files", label: "My Files" },
   { icon: Bell, href: "/notifications", label: "Notifications" },
   { icon: Settings, href: "/setup", label: "Settings" },

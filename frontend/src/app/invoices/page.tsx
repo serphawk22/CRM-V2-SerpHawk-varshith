@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import {
   Plus, X, Loader2, FileText, CheckCircle, Clock, AlertTriangle,
-  DollarSign, Send, Trash2, Download, RefreshCw
+  DollarSign, Send, Trash2, Download, RefreshCw, CreditCard, Calendar, TrendingUp
 } from "lucide-react";
 import { API_BASE_URL } from "@/config";
 import { cn } from "@/lib/utils";
@@ -150,15 +150,15 @@ export default function InvoicesPage() {
         title={isClient ? 'Understanding Your Invoices' : 'How Invoicing works'}
         description={isClient ? 'View all invoices sent to you, check payment status, and download PDF copies.' : 'Create, send, and manage invoices for client billing and payment tracking.'}
         steps={isClient ? [
-          { icon: '📄', text: 'Each invoice shows the amount, status (Draft, Sent, Paid, Overdue), and line items.' },
-          { icon: '⬇️', text: 'Click the download button on any invoice to get a PDF copy for your records.' },
-          { icon: '💳', text: 'Invoices marked \"Paid\" are completed. \"Sent\" invoices are awaiting your payment.' },
-          { icon: '📅', text: 'Check due dates to avoid overdue payments and keep your account in good standing.' },
+          { icon: <FileText size={32} />, text: 'Each invoice shows the amount, status (Draft, Sent, Paid, Overdue), and line items.' },
+          { icon: <Download size={32} />, text: 'Click the download button on any invoice to get a PDF copy for your records.' },
+          { icon: <CreditCard size={32} />, text: 'Invoices marked "Paid" are completed. "Sent" invoices are awaiting your payment.' },
+          { icon: <Calendar size={32} />, text: 'Check due dates to avoid overdue payments and keep your account in good standing.' },
         ] : [
-          { icon: '➕', text: 'Click \"New Invoice\" to create an invoice with line items, amounts, and a client recipient.' },
-          { icon: '📨', text: 'Change invoice status from Draft → Sent → Paid to track the billing lifecycle.' },
-          { icon: '📊', text: 'The stats bar shows total billed, paid, pending, and overdue amounts at a glance.' },
-          { icon: '📄', text: 'Download any invoice as a professional PDF to share with clients.' },
+          { icon: <Plus size={32} />, text: 'Click "New Invoice" to create an invoice with line items, amounts, and a client recipient.' },
+          { icon: <Send size={32} />, text: 'Change invoice status from Draft → Sent → Paid to track the billing lifecycle.' },
+          { icon: <TrendingUp size={32} />, text: 'The stats bar shows total billed, paid, pending, and overdue amounts at a glance.' },
+          { icon: <FileText size={32} />, text: 'Download any invoice as a professional PDF to share with clients.' },
         ]}
       />
 
