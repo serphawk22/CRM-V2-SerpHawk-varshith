@@ -642,6 +642,7 @@ def create_db_and_tables():
                 conn.execute(text(query))
                 conn.commit()
             except Exception:
+                conn.rollback()
                 # Column likely already exists
                 pass
         
