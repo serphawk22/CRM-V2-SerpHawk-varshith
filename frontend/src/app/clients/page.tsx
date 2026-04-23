@@ -17,7 +17,8 @@ import {
   Globe,
   MoreVertical,
   Activity,
-  Mail
+  Mail,
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { API_BASE_URL } from '@/config';

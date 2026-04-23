@@ -633,7 +633,9 @@ def create_db_and_tables():
         "ALTER TABLE analytics_data ADD COLUMN \"google_ads_spend\" FLOAT DEFAULT 0.0",
         "ALTER TABLE analytics_data ADD COLUMN \"meta_ads_spend\" FLOAT DEFAULT 0.0",
         "ALTER TABLE analytics_data ADD COLUMN \"google_ads_conversions\" INTEGER DEFAULT 0",
-        "ALTER TABLE analytics_data ADD COLUMN \"meta_ads_conversions\" INTEGER DEFAULT 0"
+        "ALTER TABLE analytics_data ADD COLUMN \"meta_ads_conversions\" INTEGER DEFAULT 0",
+        "ALTER TABLE sent_emails ADD COLUMN \"draft_json\" TEXT",
+        "ALTER TABLE sent_emails ADD COLUMN \"is_draft\" BOOLEAN DEFAULT FALSE"
     ]
     
     with engine.connect() as conn:
