@@ -10,17 +10,17 @@ export default function EducationPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const videos = [
-    { title: 'Getting Started with CRM', duration: '5:24', category: 'Basics', thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80', url: '#' },
-    { title: 'How to Read Your SEO Audit', duration: '8:45', category: 'SEO', thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', url: '#' },
-    { title: 'Understanding Monthly Invoices', duration: '3:12', category: 'Billing', thumbnail: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80', url: '#' },
-    { title: 'Using the Email Agent', duration: '12:30', category: 'Advanced', thumbnail: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=800&q=80', url: '#' },
+    { title: 'Getting Started with CRM', duration: '5:24', category: 'Basics', thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+    { title: 'How to Read Your SEO Audit', duration: '8:45', category: 'SEO', thumbnail: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+    { title: 'Understanding Monthly Invoices', duration: '3:12', category: 'Billing', thumbnail: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&q=80', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
+    { title: 'Using the Email Agent', duration: '12:30', category: 'Advanced', thumbnail: 'https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=800&q=80', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
   ];
 
   const blogs = [
-    { title: 'Top 5 SEO Strategies for 2026', date: 'Oct 12, 2026', category: 'Strategy', readTime: '5 min read', url: '#' },
-    { title: 'How to increase conversion rate by 20%', date: 'Sep 28, 2026', category: 'Growth', readTime: '8 min read', url: '#' },
-    { title: 'Why local SEO matters more than ever', date: 'Sep 15, 2026', category: 'Local SEO', readTime: '6 min read', url: '#' },
-    { title: 'Understanding backlink quality', date: 'Aug 30, 2026', category: 'Link Building', readTime: '10 min read', url: '#' },
+    { title: 'Top 5 SEO Strategies for 2026', date: 'Oct 12, 2026', category: 'Strategy', readTime: '5 min read', url: 'https://medium.com' },
+    { title: 'How to increase conversion rate by 20%', date: 'Sep 28, 2026', category: 'Growth', readTime: '8 min read', url: 'https://medium.com' },
+    { title: 'Why local SEO matters more than ever', date: 'Sep 15, 2026', category: 'Local SEO', readTime: '6 min read', url: 'https://medium.com' },
+    { title: 'Understanding backlink quality', date: 'Aug 30, 2026', category: 'Link Building', readTime: '10 min read', url: 'https://medium.com' },
   ];
 
   const filteredVideos = videos.filter(v => v.title.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -81,7 +81,7 @@ export default function EducationPage() {
           {activeTab === 'videos' ? (
             <motion.div key="videos" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredVideos.map((video, i) => (
-                <a key={i} href={video.url} className="group bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all cursor-pointer block">
+                <a key={i} href={video.url} target="_blank" rel="noopener noreferrer" className="group bg-zinc-900 border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all cursor-pointer block">
                   <div className="h-48 relative overflow-hidden">
                     <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
@@ -101,7 +101,7 @@ export default function EducationPage() {
           ) : (
             <motion.div key="blogs" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBlogs.map((blog, i) => (
-                <a key={i} href={blog.url} className="group bg-zinc-900 border border-white/5 rounded-2xl p-6 hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between h-full block">
+                <a key={i} href={blog.url} target="_blank" rel="noopener noreferrer" className="group bg-zinc-900 border border-white/5 rounded-2xl p-6 hover:border-emerald-500/30 transition-all cursor-pointer flex flex-col justify-between h-full block">
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <div className="text-[10px] font-black uppercase tracking-widest text-emerald-500">{blog.category}</div>
