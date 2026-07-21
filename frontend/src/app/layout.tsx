@@ -119,7 +119,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Google Translate — suppress the native toolbar, we use our own toggle */}
+        {/* Suppress Google Translate native toolbar */}
         <style>{`
           .goog-te-banner-frame, .goog-te-balloon-frame { display: none !important; }
           .goog-te-gadget { display: none !important; }
@@ -127,9 +127,18 @@ export default function RootLayout({
           .skiptranslate { display: none !important; }
           #google_translate_element { display: none !important; }
         `}</style>
+        {/* SYNC — runs before GT loads. notranslate blocks GT if user wants English */}
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            if (sessionStorage.getItem('crm_gt_restore_en') === '1') {
+              sessionStorage.removeItem('crm_gt_restore_en');
+              document.documentElement.classList.add('notranslate');
+              document.documentElement.setAttribute('translate', 'no');
+            }
+          })();
+        `}} />
       </head>
       <body className={inter.className}>
-        {/* Hidden Google Translate hook */}
         <div id="google_translate_element" style={{ display: "none" }} />
         <Script
           id="google-translate-init"
@@ -141,27 +150,6 @@ export default function RootLayout({
                   { pageLanguage: 'en', includedLanguages: 'es', autoDisplay: false },
                   'google_translate_element'
                 );
-
-                // After GT widget loads, check if user clicked EN and we need to block re-translation.
-                // GT can re-apply a previous translation 2-3s after load from its own memory.
-                // The sessionStorage flag tells us to immediately force English after init.
-                if (sessionStorage.getItem('crm_gt_restore_en') === '1') {
-                  sessionStorage.removeItem('crm_gt_restore_en');
-                  var forceEnglish = function(tries) {
-                    var sel = document.querySelector('.goog-te-combo');
-                    if (sel) {
-                      sel.value = '';
-                      sel.dispatchEvent(new Event('change'));
-                    } else if (tries < 30) {
-                      setTimeout(function() { forceEnglish(tries + 1); }, 100);
-                    }
-                  };
-                  // Fire at 0ms, 500ms, 1500ms, 3000ms to beat GT's auto-retranslation
-                  forceEnglish(0);
-                  setTimeout(function() { forceEnglish(0); }, 500);
-                  setTimeout(function() { forceEnglish(0); }, 1500);
-                  setTimeout(function() { forceEnglish(0); }, 3000);
-                }
               }
             `,
           }}

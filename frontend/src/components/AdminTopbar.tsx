@@ -92,25 +92,29 @@ export function AdminTopbar() {
   // ── Google Translate programmatic control ──
   const translatePage = useCallback((lang: "en" | "es") => {
     setLanguage(lang);
+
+    if (lang === "en") {
+      // Sync script in <head> reads this flag on reload and adds
+      // 'notranslate' to <html> BEFORE GT loads — GT never retranslates.
+      sessionStorage.setItem("crm_gt_restore_en", "1");
+      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`;
+      window.location.reload();
+      return;
+    }
+
+    // Switching TO Spanish:
+    // Remove notranslate so GT is allowed to translate the page.
+    document.documentElement.classList.remove("notranslate");
+    document.documentElement.removeAttribute("translate");
+
     const tryTranslate = (attempts = 0) => {
-      // Restoring to English: GT cannot reliably restore via the select box alone.
-      // Clear the googtrans cookie and reload — the only guaranteed restore.
-      if (lang === "en") {
-        // Flag tells googleTranslateElementInit (after reload) to force English
-        sessionStorage.setItem("crm_gt_restore_en", "1");
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`;
-        window.location.reload();
-        return;
-      }
-      // Switching to Spanish — use the hidden GT select
       const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
       if (select) {
         select.value = lang;
         select.dispatchEvent(new Event("change"));
       } else if (attempts < 20) {
-        // Retry up to 20 times (2s total) while GT loads
         setTimeout(() => tryTranslate(attempts + 1), 100);
       }
     };
