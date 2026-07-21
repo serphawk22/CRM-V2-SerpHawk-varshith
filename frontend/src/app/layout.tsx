@@ -141,6 +141,27 @@ export default function RootLayout({
                   { pageLanguage: 'en', includedLanguages: 'es', autoDisplay: false },
                   'google_translate_element'
                 );
+
+                // After GT widget loads, check if user clicked EN and we need to block re-translation.
+                // GT can re-apply a previous translation 2-3s after load from its own memory.
+                // The sessionStorage flag tells us to immediately force English after init.
+                if (sessionStorage.getItem('crm_gt_restore_en') === '1') {
+                  sessionStorage.removeItem('crm_gt_restore_en');
+                  var forceEnglish = function(tries) {
+                    var sel = document.querySelector('.goog-te-combo');
+                    if (sel) {
+                      sel.value = '';
+                      sel.dispatchEvent(new Event('change'));
+                    } else if (tries < 30) {
+                      setTimeout(function() { forceEnglish(tries + 1); }, 100);
+                    }
+                  };
+                  // Fire at 0ms, 500ms, 1500ms, 3000ms to beat GT's auto-retranslation
+                  forceEnglish(0);
+                  setTimeout(function() { forceEnglish(0); }, 500);
+                  setTimeout(function() { forceEnglish(0); }, 1500);
+                  setTimeout(function() { forceEnglish(0); }, 3000);
+                }
               }
             `,
           }}
