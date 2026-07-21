@@ -7,6 +7,7 @@ import { Chatbot } from "@/components/Chatbot";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { AdminTopbar } from "@/components/AdminTopbar";
 import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
+import Script from "next/script";
 
 function AdminMainContent({ children }: { children: React.ReactNode }) {
   const { collapsed, isMobile } = useSidebar();
@@ -117,7 +118,37 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Google Translate — suppress the native toolbar, we use our own toggle */}
+        <style>{`
+          .goog-te-banner-frame, .goog-te-balloon-frame { display: none !important; }
+          .goog-te-gadget { display: none !important; }
+          body { top: 0 !important; }
+          .skiptranslate { display: none !important; }
+          #google_translate_element { display: none !important; }
+        `}</style>
+      </head>
       <body className={inter.className}>
+        {/* Hidden Google Translate hook */}
+        <div id="google_translate_element" style={{ display: "none" }} />
+        <Script
+          id="google-translate-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                  { pageLanguage: 'en', includedLanguages: 'es', autoDisplay: false },
+                  'google_translate_element'
+                );
+              }
+            `,
+          }}
+        />
+        <Script
+          src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
         <RoleProvider>
           <AppContent>{children}</AppContent>
         </RoleProvider>

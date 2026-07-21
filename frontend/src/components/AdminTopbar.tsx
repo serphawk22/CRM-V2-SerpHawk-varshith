@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -66,6 +66,7 @@ export function AdminTopbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [recentNotifs, setRecentNotifs] = useState<any[]>([]);
+  const [language, setLanguage] = useState<"en" | "es">("en");
   const searchRef = useRef<HTMLInputElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
@@ -87,6 +88,23 @@ export function AdminTopbar() {
     const interval = setInterval(fetchNotifs, 30000); // poll every 30s
     return () => clearInterval(interval);
   }, [user?.id]);
+
+  // ── Google Translate programmatic control ──
+  const translatePage = useCallback((lang: "en" | "es") => {
+    const tryTranslate = (attempts = 0) => {
+      // Google Translate injects a hidden <select> with language codes
+      const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
+      if (select) {
+        select.value = lang;
+        select.dispatchEvent(new Event("change"));
+        setLanguage(lang);
+      } else if (attempts < 20) {
+        // Retry up to 20 times (2s total) while GT loads
+        setTimeout(() => tryTranslate(attempts + 1), 100);
+      }
+    };
+    tryTranslate();
+  }, []);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -257,6 +275,59 @@ export function AdminTopbar() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Divider */}
+        <div className="w-px h-6 bg-slate-200 mx-1" />
+
+        {/* ── Language Toggle ── */}
+        <motion.div
+          className="flex items-center gap-0.5 bg-slate-100 border border-slate-200 rounded-xl p-0.5 h-9"
+          whileHover={{ boxShadow: "0 0 0 2px rgba(99,102,241,0.15)" }}
+        >
+          {/* EN Button */}
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => translatePage("en")}
+            title="Switch to English"
+            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black transition-all duration-200 ${
+              language === "en"
+                ? "bg-white text-indigo-700 shadow-sm border border-indigo-100"
+                : "text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            <span className="text-[13px] leading-none">🇺🇸</span>
+            <span className="hidden sm:inline">EN</span>
+            {language === "en" && (
+              <motion.span
+                layoutId="lang-active-pill"
+                className="absolute inset-0 rounded-lg bg-white border border-indigo-100 shadow-sm -z-10"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+          </motion.button>
+
+          {/* ES Button */}
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => translatePage("es")}
+            title="Cambiar a Español"
+            className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-black transition-all duration-200 ${
+              language === "es"
+                ? "bg-white text-indigo-700 shadow-sm border border-indigo-100"
+                : "text-slate-400 hover:text-slate-600"
+            }`}
+          >
+            <span className="text-[13px] leading-none">🇪🇸</span>
+            <span className="hidden sm:inline">ES</span>
+            {language === "es" && (
+              <motion.span
+                layoutId="lang-active-pill"
+                className="absolute inset-0 rounded-lg bg-white border border-indigo-100 shadow-sm -z-10"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+          </motion.button>
+        </motion.div>
 
         {/* Divider */}
         <div className="w-px h-6 bg-slate-200 mx-1" />
