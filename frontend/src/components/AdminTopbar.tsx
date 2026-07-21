@@ -91,13 +91,22 @@ export function AdminTopbar() {
 
   // ── Google Translate programmatic control ──
   const translatePage = useCallback((lang: "en" | "es") => {
+    setLanguage(lang);
     const tryTranslate = (attempts = 0) => {
-      // Google Translate injects a hidden <select> with language codes
+      // Restoring to English: GT cannot reliably restore via the select box alone.
+      // Clear the googtrans cookie and reload — the only guaranteed restore.
+      if (lang === "en") {
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname}`;
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname}`;
+        window.location.reload();
+        return;
+      }
+      // Switching to Spanish — use the hidden GT select
       const select = document.querySelector<HTMLSelectElement>(".goog-te-combo");
       if (select) {
         select.value = lang;
         select.dispatchEvent(new Event("change"));
-        setLanguage(lang);
       } else if (attempts < 20) {
         // Retry up to 20 times (2s total) while GT loads
         setTimeout(() => tryTranslate(attempts + 1), 100);
